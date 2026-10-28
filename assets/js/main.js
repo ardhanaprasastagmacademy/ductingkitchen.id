@@ -645,5 +645,51 @@ function trackEvent(eventName, params) {
   });
 })();
 
+/* -------------------------------------------------------
+   ARTICLE SOCIAL SHARE & COPY LINK
+------------------------------------------------------- */
+(function initArticleShare() {
+  const copyButtons = document.querySelectorAll('.js-copy-link');
+  if (!copyButtons.length) return;
 
+  copyButtons.forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const url = window.location.href;
+      const copyTextSpan = btn.querySelector('.copy-text');
+      const originalText = copyTextSpan ? copyTextSpan.textContent : 'Salin Link';
 
+      function onSuccess() {
+        btn.classList.add('is-copied');
+        if (copyTextSpan) copyTextSpan.textContent = 'Tersalin!';
+        setTimeout(function () {
+          btn.classList.remove('is-copied');
+          if (copyTextSpan) copyTextSpan.textContent = originalText;
+        }, 2000);
+      }
+
+      function fallback() {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          onSuccess();
+        } catch (err) {
+          console.error('Gagal menyalin:', err);
+        }
+        document.body.removeChild(textarea);
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(onSuccess).catch(fallback);
+      } else {
+        fallback();
+      }
+    });
+  });
+})();
